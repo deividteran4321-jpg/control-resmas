@@ -5,14 +5,13 @@ import pandas as pd
 import streamlit as st
 
 from core.database import init_db
-from core.theme import inject_custom_theme, render_sidebar_mascota
+from core.theme import inject_custom_theme
 from core.exports import build_excel_bytes, build_pdf_bytes
 from core.queries import get_empleados_conocidos, get_entregas_df, get_gerencias
 
 st.set_page_config(page_title="Reportes", page_icon="📊", layout="wide")
 init_db()
 inject_custom_theme()
-render_sidebar_mascota()
 
 st.title("📊 Módulo de Reportes")
 

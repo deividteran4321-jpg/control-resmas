@@ -4,7 +4,7 @@ from datetime import date
 import streamlit as st
 
 from core.database import init_db
-from core.theme import inject_custom_theme, render_sidebar_mascota
+from core.theme import inject_custom_theme
 from core.queries import (
     add_gerencia,
     eliminar_gerencia,
@@ -19,7 +19,6 @@ from core.queries import (
 st.set_page_config(page_title="Gestión de Stock", page_icon="📦", layout="wide")
 init_db()
 inject_custom_theme()
-render_sidebar_mascota()
 
 st.title("📦 Gestión de Stock e Inventario")
 

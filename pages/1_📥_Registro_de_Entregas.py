@@ -4,10 +4,11 @@ from datetime import date
 import streamlit as st
 
 from core.database import init_db
-from core.theme import inject_custom_theme, render_sidebar_mascota
+from core.theme import inject_custom_theme
 from core.queries import (
     add_gerencia,
     dia_semana,
+    eliminar_entrega,
     get_empleados_conocidos,
     get_entregas_df,
     get_gerencias,
@@ -18,7 +19,6 @@ from core.queries import (
 st.set_page_config(page_title="Registro de Entregas", page_icon="📥", layout="wide")
 init_db()
 inject_custom_theme()
-render_sidebar_mascota()
 
 st.title("📥 Registro de Entregas")
 st.caption("Carga rápida de resmas entregadas por empleado y gerencia.")
@@ -92,4 +92,23 @@ if df.empty:
     st.info("Todavía no hay entregas registradas.")
 else:
     columnas = ["fecha", "dia", "gerencia", "empleado", "cantidad"]
-    st.dataframe(df[columnas].head(20), use_container_width=True, hide_index=True)
+    ultimas = df.head(20)
+    st.dataframe(ultimas[columnas], use_container_width=True, hide_index=True)
+
+    st.markdown("##### ¿Cargaste algo por error?")
+    opciones = {
+        f"#{row.id} · {row.fecha} · {row.gerencia} · {row.empleado} · {row.cantidad} resmas": row.id
+        for row in ultimas.itertuples()
+    }
+    col_sel, col_btn = st.columns([3, 1])
+    with col_sel:
+        seleccion = st.selectbox(
+            "Selecciona la entrega a eliminar",
+            options=list(opciones.keys()),
+            label_visibility="collapsed",
+        )
+    with col_btn:
+        if st.button("🗑️ Eliminar", use_container_width=True):
+            eliminar_entrega(opciones[seleccion])
+            st.success("Entrega eliminada. El stock se restauró automáticamente.")
+            st.rerun()

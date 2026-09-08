@@ -124,6 +124,15 @@ def registrar_entrega(fecha: date, gerencia: str, empleado: str, cantidad: int) 
         s.commit()
 
 
+def eliminar_entrega(entrega_id: int) -> None:
+    """Elimina una entrega registrada por error; el stock se recalcula solo."""
+    with SessionLocal() as s:
+        entrega = s.get(Entrega, entrega_id)
+        if entrega:
+            s.delete(entrega)
+            s.commit()
+
+
 def get_entregas_df(
     fecha_desde: Optional[date] = None,
     fecha_hasta: Optional[date] = None,
