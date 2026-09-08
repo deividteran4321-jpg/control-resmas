@@ -10,6 +10,7 @@ import pandas as pd
 from sqlalchemy import func, select
 
 from core.database import (
+    TIPOS_RESMA,
     Configuracion,
     Entrega,
     Gerencia,
@@ -83,9 +84,18 @@ def set_umbral_stock_bajo(valor: int) -> None:
 
 # --- Stock -------------------------------------------------------------------
 
-def registrar_ingreso(fecha: date, cantidad: int, observacion: str = "") -> None:
+def registrar_ingreso(
+    fecha: date, tipo_resma: str, cantidad: int, observacion: str = ""
+) -> None:
     with SessionLocal() as s:
-        s.add(Ingreso(fecha=fecha, cantidad=cantidad, observacion=observacion))
+        s.add(
+            Ingreso(
+                fecha=fecha,
+                tipo_resma=tipo_resma,
+                cantidad=cantidad,
+                observacion=observacion,
+            )
+        )
         s.commit()
 
 
@@ -100,7 +110,26 @@ def get_total_entregado() -> int:
 
 
 def get_stock_actual() -> int:
+    """Stock total sumando todos los tipos de resma."""
     return get_total_ingresos() - get_total_entregado()
+
+
+def get_stock_por_tipo() -> dict:
+    """Devuelve {tipo_resma: stock_disponible} para cada tipo conocido."""
+    with SessionLocal() as s:
+        ingresos = dict(
+            s.query(Ingreso.tipo_resma, func.coalesce(func.sum(Ingreso.cantidad), 0))
+            .group_by(Ingreso.tipo_resma)
+            .all()
+        )
+        entregas = dict(
+            s.query(Entrega.tipo_resma, func.coalesce(func.sum(Entrega.cantidad), 0))
+            .group_by(Entrega.tipo_resma)
+            .all()
+        )
+    return {
+        tipo: ingresos.get(tipo, 0) - entregas.get(tipo, 0) for tipo in TIPOS_RESMA
+    }
 
 
 def get_ingresos_df() -> pd.DataFrame:
@@ -110,7 +139,9 @@ def get_ingresos_df() -> pd.DataFrame:
 
 # --- Entregas ------------------------------------------------------------------
 
-def registrar_entrega(fecha: date, gerencia: str, empleado: str, cantidad: int) -> None:
+def registrar_entrega(
+    fecha: date, gerencia: str, empleado: str, tipo_resma: str, cantidad: int
+) -> None:
     with SessionLocal() as s:
         s.add(
             Entrega(
@@ -118,6 +149,7 @@ def registrar_entrega(fecha: date, gerencia: str, empleado: str, cantidad: int) 
                 dia=dia_semana(fecha),
                 gerencia=gerencia,
                 empleado=empleado,
+                tipo_resma=tipo_resma,
                 cantidad=cantidad,
             )
         )
@@ -138,6 +170,7 @@ def get_entregas_df(
     fecha_hasta: Optional[date] = None,
     gerencias: Optional[Iterable[str]] = None,
     empleados: Optional[Iterable[str]] = None,
+    tipos_resma: Optional[Iterable[str]] = None,
 ) -> pd.DataFrame:
     stmt = select(Entrega)
     if fecha_desde:
@@ -148,6 +181,8 @@ def get_entregas_df(
         stmt = stmt.where(Entrega.gerencia.in_(list(gerencias)))
     if empleados:
         stmt = stmt.where(Entrega.empleado.in_(list(empleados)))
+    if tipos_resma:
+        stmt = stmt.where(Entrega.tipo_resma.in_(list(tipos_resma)))
     stmt = stmt.order_by(Entrega.fecha.desc())
     return pd.read_sql(stmt, engine)
 

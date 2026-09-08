@@ -4,7 +4,7 @@ from datetime import date
 import pandas as pd
 import streamlit as st
 
-from core.database import init_db
+from core.database import TIPOS_RESMA, init_db
 from core.theme import inject_custom_theme
 from core.exports import build_excel_bytes, build_pdf_bytes
 from core.queries import get_empleados_conocidos, get_entregas_df, get_gerencias
@@ -18,7 +18,7 @@ st.title("📊 Módulo de Reportes")
 gerencias = get_gerencias()
 empleados = get_empleados_conocidos()
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     fecha_desde = st.date_input(
         "Desde", value=date.today().replace(day=1), format="DD/MM/YYYY"
@@ -29,12 +29,15 @@ with col3:
     gerencias_sel = st.multiselect("Gerencia(s)", options=gerencias, default=[])
 with col4:
     empleados_sel = st.multiselect("Empleado(s)", options=empleados, default=[])
+with col5:
+    tipos_sel = st.multiselect("Tipo(s) de resma", options=TIPOS_RESMA, default=[])
 
 df = get_entregas_df(
     fecha_desde=fecha_desde,
     fecha_hasta=fecha_hasta,
     gerencias=gerencias_sel or None,
     empleados=empleados_sel or None,
+    tipos_resma=tipos_sel or None,
 )
 
 st.divider()
@@ -42,7 +45,7 @@ c1, c2 = st.columns(2)
 c1.metric("Total de resmas entregadas", int(df["cantidad"].sum()) if not df.empty else 0)
 c2.metric("Cantidad de entregas", len(df))
 
-columnas = ["fecha", "dia", "gerencia", "empleado", "cantidad"]
+columnas = ["fecha", "dia", "gerencia", "empleado", "tipo_resma", "cantidad"]
 
 st.subheader("Detalle de entregas")
 if df.empty:

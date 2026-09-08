@@ -28,6 +28,6 @@ echo Se abrira en tu navegador. NO cierres esta ventana mientras uses la app.
 echo Para apagarla: cierra esta ventana o presiona Ctrl+C.
 echo.
 
-".venv\Scripts\streamlit.exe" run app.py
+".venv\Scripts\streamlit.exe" run Control_de_Resmas.py
 
 pause

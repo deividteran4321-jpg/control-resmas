@@ -3,7 +3,7 @@ from datetime import date
 
 import streamlit as st
 
-from core.database import init_db
+from core.database import TIPOS_RESMA, init_db
 from core.theme import inject_custom_theme
 from core.queries import (
     add_gerencia,
@@ -12,7 +12,7 @@ from core.queries import (
     get_empleados_conocidos,
     get_entregas_df,
     get_gerencias,
-    get_stock_actual,
+    get_stock_por_tipo,
     registrar_entrega,
 )
 
@@ -23,8 +23,10 @@ inject_custom_theme()
 st.title("📥 Registro de Entregas")
 st.caption("Carga rápida de resmas entregadas por empleado y gerencia.")
 
-stock_actual = get_stock_actual()
-st.metric("Stock disponible", f"{stock_actual} resmas")
+stock_por_tipo = get_stock_por_tipo()
+cols_stock = st.columns(len(TIPOS_RESMA))
+for col, tipo in zip(cols_stock, TIPOS_RESMA):
+    col.metric(tipo, f"{stock_por_tipo[tipo]} resmas")
 
 gerencias = get_gerencias()
 empleados = get_empleados_conocidos()
@@ -51,9 +53,13 @@ with st.form("form_entrega", clear_on_submit=True):
         if empleado_sel == NUEVO_EMPLEADO:
             empleado_nuevo = st.text_input("Nombre del nuevo empleado")
 
-    cantidad = st.number_input(
-        "Cantidad de resmas entregadas", min_value=1, step=1, value=1
-    )
+    col5, col6 = st.columns(2)
+    with col5:
+        tipo_sel = st.selectbox("Tipo de resma", options=TIPOS_RESMA)
+    with col6:
+        cantidad = st.number_input(
+            "Cantidad de resmas entregadas", min_value=1, step=1, value=1
+        )
 
     enviado = st.form_submit_button(
         "Registrar entrega", type="primary", use_container_width=True
@@ -66,22 +72,26 @@ with st.form("form_entrega", clear_on_submit=True):
         empleado_final = (
             empleado_nuevo.strip() if empleado_sel == NUEVO_EMPLEADO else empleado_sel
         )
+        stock_disponible_tipo = stock_por_tipo[tipo_sel]
 
         if not gerencia_final:
             st.error("Debes indicar una gerencia.")
         elif not empleado_final:
             st.error("Debes indicar el nombre del empleado.")
-        elif cantidad > stock_actual:
+        elif cantidad > stock_disponible_tipo:
             st.error(
-                f"No hay stock suficiente. Stock disponible: {stock_actual} resmas."
+                f"No hay stock suficiente de {tipo_sel}. "
+                f"Stock disponible: {stock_disponible_tipo} resmas."
             )
         else:
             if gerencia_sel == NUEVA_GERENCIA:
                 add_gerencia(gerencia_final)
-            registrar_entrega(fecha, gerencia_final, empleado_final, int(cantidad))
+            registrar_entrega(
+                fecha, gerencia_final, empleado_final, tipo_sel, int(cantidad)
+            )
             st.success(
-                f"Entrega registrada: {cantidad} resmas para {empleado_final} "
-                f"({gerencia_final})."
+                f"Entrega registrada: {cantidad} resmas de {tipo_sel} para "
+                f"{empleado_final} ({gerencia_final})."
             )
             st.rerun()
 
@@ -91,13 +101,14 @@ df = get_entregas_df()
 if df.empty:
     st.info("Todavía no hay entregas registradas.")
 else:
-    columnas = ["fecha", "dia", "gerencia", "empleado", "cantidad"]
+    columnas = ["fecha", "dia", "gerencia", "empleado", "tipo_resma", "cantidad"]
     ultimas = df.head(20)
     st.dataframe(ultimas[columnas], use_container_width=True, hide_index=True)
 
     st.markdown("##### ¿Cargaste algo por error?")
     opciones = {
-        f"#{row.id} · {row.fecha} · {row.gerencia} · {row.empleado} · {row.cantidad} resmas": row.id
+        f"#{row.id} · {row.fecha} · {row.gerencia} · {row.empleado} · "
+        f"{row.tipo_resma} · {row.cantidad} resmas": row.id
         for row in ultimas.itertuples()
     }
     col_sel, col_btn = st.columns([3, 1])

@@ -3,7 +3,7 @@ from datetime import date
 
 import streamlit as st
 
-from core.database import init_db
+from core.database import TIPOS_RESMA, init_db
 from core.theme import inject_custom_theme
 from core.queries import (
     add_gerencia,
@@ -11,6 +11,7 @@ from core.queries import (
     get_gerencias,
     get_ingresos_df,
     get_stock_actual,
+    get_stock_por_tipo,
     get_umbral_stock_bajo,
     registrar_ingreso,
     set_umbral_stock_bajo,
@@ -23,15 +24,22 @@ inject_custom_theme()
 st.title("📦 Gestión de Stock e Inventario")
 
 stock_actual = get_stock_actual()
+stock_por_tipo = get_stock_por_tipo()
 umbral = get_umbral_stock_bajo()
 
 col1, col2 = st.columns(2)
-col1.metric("Stock actual", f"{stock_actual} resmas")
+col1.metric("Stock actual (total)", f"{stock_actual} resmas")
 col2.metric("Umbral de alerta", f"{umbral} resmas")
 
-if stock_actual <= umbral:
+cols_tipo = st.columns(len(TIPOS_RESMA))
+for col, tipo in zip(cols_tipo, TIPOS_RESMA):
+    col.metric(tipo, f"{stock_por_tipo[tipo]} resmas")
+
+tipos_bajos = [t for t, c in stock_por_tipo.items() if c <= umbral]
+if tipos_bajos:
+    detalle = " · ".join(f"{t}: {stock_por_tipo[t]}" for t in tipos_bajos)
     st.error(
-        f"⚠️ Stock bajo: quedan {stock_actual} resmas (umbral: {umbral}). "
+        f"⚠️ Stock bajo (umbral: {umbral} resmas) → {detalle}. "
         "Registra un nuevo ingreso a continuación."
     )
 
@@ -44,6 +52,7 @@ with tab_ingreso:
             fecha = st.date_input(
                 "Fecha de ingreso", value=date.today(), format="DD/MM/YYYY"
             )
+            tipo_sel = st.selectbox("Tipo de resma", options=TIPOS_RESMA)
             cantidad = st.number_input(
                 "Cantidad de resmas ingresadas", min_value=1, step=1, value=1
             )
@@ -57,8 +66,8 @@ with tab_ingreso:
             "Registrar ingreso", type="primary", use_container_width=True
         )
         if enviado:
-            registrar_ingreso(fecha, int(cantidad), observacion.strip())
-            st.success(f"Ingreso registrado: {cantidad} resmas.")
+            registrar_ingreso(fecha, tipo_sel, int(cantidad), observacion.strip())
+            st.success(f"Ingreso registrado: {cantidad} resmas de {tipo_sel}.")
             st.rerun()
 
     st.divider()
@@ -68,7 +77,7 @@ with tab_ingreso:
         st.info("Todavía no hay ingresos registrados.")
     else:
         st.dataframe(
-            df_ing[["fecha", "cantidad", "observacion"]],
+            df_ing[["fecha", "tipo_resma", "cantidad", "observacion"]],
             use_container_width=True,
             hide_index=True,
         )

@@ -11,7 +11,7 @@ y backend, y porque se despliega gratis en minutos.
 
 ```
 control-resmas/
-├── app.py                          Dashboard principal (KPIs + gráficos)
+├── Control_de_Resmas.py            Dashboard principal (KPIs + gráficos)
 ├── core/
 │   ├── database.py                 Conexión a BD + modelos (SQLAlchemy)
 │   ├── queries.py                  Toda la lógica de negocio (altas, KPIs, filtros)
@@ -51,7 +51,7 @@ cd control-resmas
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-streamlit run app.py
+streamlit run Control_de_Resmas.py
 ```
 
 Se abrirá en `http://localhost:8501`. La primera vez se crea automáticamente
@@ -95,7 +95,7 @@ postgresql+psycopg2://usuario:password@host:5432/nombre_bd
 2. Entra a [share.streamlit.io](https://share.streamlit.io) e inicia sesión con
    GitHub.
 3. Clic en **"New app"**, selecciona el repositorio y la rama `main`, y en
-   "Main file path" escribe `app.py`.
+   "Main file path" escribe `Control_de_Resmas.py`.
 4. Antes de darle a **Deploy**, abre **"Advanced settings" → "Secrets"** y pega:
    ```toml
    DATABASE_URL = "postgresql+psycopg2://usuario:password@host:5432/nombre_bd"

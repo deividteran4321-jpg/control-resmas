@@ -9,6 +9,7 @@ from core.queries import (
     get_consumo_mes_actual,
     get_consumo_por_gerencia,
     get_stock_actual,
+    get_stock_por_tipo,
     get_top_empleado,
     get_top_gerencia,
     get_umbral_stock_bajo,
@@ -24,15 +25,18 @@ st.caption(
 )
 
 stock_actual = get_stock_actual()
+stock_por_tipo = get_stock_por_tipo()
 umbral = get_umbral_stock_bajo()
 consumo_mes = get_consumo_mes_actual()
 top_empleado, cant_empleado = get_top_empleado(mes_actual=True)
 top_gerencia, cant_gerencia = get_top_gerencia(mes_actual=True)
 
-if stock_actual <= umbral:
+tipos_bajos = [tipo for tipo, cant in stock_por_tipo.items() if cant <= umbral]
+if tipos_bajos:
+    detalle = " · ".join(f"{t}: {stock_por_tipo[t]} resmas" for t in tipos_bajos)
     st.error(
-        f"⚠️ Stock bajo: quedan **{stock_actual} resmas** "
-        f"(umbral configurado: {umbral}). Ve a **Gestión de Stock** para ingresar más."
+        f"⚠️ Stock bajo (umbral: {umbral} resmas) → {detalle}. "
+        "Ve a **Gestión de Stock** para ingresar más."
     )
 
 col1, col2, col3, col4 = st.columns(4)
@@ -48,6 +52,8 @@ col4.metric(
     top_gerencia or "—",
     f"{cant_gerencia} resmas" if top_gerencia else None,
 )
+
+st.caption("Stock por tipo: " + "  ·  ".join(f"**{t}**: {c} resmas" for t, c in stock_por_tipo.items()))
 
 st.divider()
 
