@@ -3,7 +3,7 @@ import plotly.express as px
 import streamlit as st
 
 from core.database import init_db
-from core.theme import inject_custom_theme
+from core.theme import inject_custom_theme, render_sidebar_mascota
 from core.queries import (
     get_consumo_mensual,
     get_consumo_mes_actual,
@@ -17,6 +17,7 @@ from core.queries import (
 st.set_page_config(page_title="Control de Resmas", page_icon="📄", layout="wide")
 init_db()
 inject_custom_theme()
+render_sidebar_mascota()
 
 st.title("📄 Control de Inventario y Consumo de Resmas")
 st.caption(

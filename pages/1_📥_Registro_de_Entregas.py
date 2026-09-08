@@ -4,7 +4,7 @@ from datetime import date
 import streamlit as st
 
 from core.database import init_db
-from core.theme import inject_custom_theme
+from core.theme import inject_custom_theme, render_sidebar_mascota
 from core.queries import (
     add_gerencia,
     dia_semana,
@@ -18,6 +18,7 @@ from core.queries import (
 st.set_page_config(page_title="Registro de Entregas", page_icon="📥", layout="wide")
 init_db()
 inject_custom_theme()
+render_sidebar_mascota()
 
 st.title("📥 Registro de Entregas")
 st.caption("Carga rápida de resmas entregadas por empleado y gerencia.")

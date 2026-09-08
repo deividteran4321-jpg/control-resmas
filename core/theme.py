@@ -2,9 +2,13 @@
 pequeñas animaciones. Se inyecta como CSS/HTML dentro de Streamlit — no
 requiere ningún paquete adicional.
 """
+import os
 from urllib.parse import quote
 
 import streamlit as st
+
+_ASSETS_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
+_MASCOTA_PATH = os.path.join(_ASSETS_DIR, "mascota_escritorio.gif")
 
 _PATTERN_SVG = """
 <svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'>
@@ -130,3 +134,15 @@ def inject_custom_theme() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_sidebar_mascota() -> None:
+    """Muestra la mascota animada en la parte inferior del menú lateral."""
+    if os.path.exists(_MASCOTA_PATH):
+        with st.sidebar:
+            st.markdown(
+                '<div style="text-align:center; margin-top:10px;">',
+                unsafe_allow_html=True,
+            )
+            st.image(_MASCOTA_PATH, width=140)
+            st.markdown("</div>", unsafe_allow_html=True)
