@@ -13,6 +13,7 @@ from datetime import datetime
 
 import streamlit as st
 from sqlalchemy import Column, Integer, String, Date, DateTime, create_engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
@@ -92,8 +93,18 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
 def init_db() -> None:
-    """Crea las tablas si no existen y siembra datos base. Idempotente."""
-    Base.metadata.create_all(engine)
+    """Crea las tablas si no existen y siembra datos base. Idempotente.
+
+    Streamlit puede ejecutar varias sesiones en paralelo sobre el mismo
+    proceso; si dos llegan a crear las tablas casi al mismo tiempo, SQLite
+    puede reportar "already exists" aunque el checkfirst haya pasado. Se
+    ignora ese caso puntual en vez de tumbar la app.
+    """
+    try:
+        Base.metadata.create_all(engine)
+    except OperationalError as exc:
+        if "already exists" not in str(exc):
+            raise
     with SessionLocal() as session:
         if session.query(Gerencia).count() == 0:
             session.add_all([Gerencia(nombre=n) for n in DEFAULT_GERENCIAS])
