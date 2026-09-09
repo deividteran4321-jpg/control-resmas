@@ -62,7 +62,7 @@ with st.form("form_entrega", clear_on_submit=True):
         )
 
     enviado = st.form_submit_button(
-        "Registrar entrega", type="primary", use_container_width=True
+        "Registrar entrega", type="primary", width="stretch"
     )
 
     if enviado:
@@ -103,7 +103,7 @@ if df.empty:
 else:
     columnas = ["fecha", "dia", "gerencia", "empleado", "tipo_resma", "cantidad"]
     ultimas = df.head(20)
-    st.dataframe(ultimas[columnas], use_container_width=True, hide_index=True)
+    st.dataframe(ultimas[columnas], width="stretch", hide_index=True)
 
     st.markdown("##### ¿Cargaste algo por error?")
     opciones = {
@@ -119,7 +119,7 @@ else:
             label_visibility="collapsed",
         )
     with col_btn:
-        if st.button("🗑️ Eliminar", use_container_width=True):
+        if st.button("🗑️ Eliminar", width="stretch"):
             eliminar_entrega(opciones[seleccion])
             st.success("Entrega eliminada. El stock se restauró automáticamente.")
             st.rerun()

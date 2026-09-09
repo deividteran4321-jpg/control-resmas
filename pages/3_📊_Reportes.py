@@ -51,7 +51,7 @@ st.subheader("Detalle de entregas")
 if df.empty:
     st.info("No hay datos para los filtros seleccionados.")
 else:
-    st.dataframe(df[columnas], use_container_width=True, hide_index=True)
+    st.dataframe(df[columnas], width="stretch", hide_index=True)
 
     col_res1, col_res2 = st.columns(2)
     with col_res1:
@@ -62,14 +62,14 @@ else:
             .reset_index()
             .sort_values("cantidad", ascending=False)
         )
-        st.dataframe(resumen_gerencia, use_container_width=True, hide_index=True)
+        st.dataframe(resumen_gerencia, width="stretch", hide_index=True)
 
     with col_res2:
         st.subheader("Conteo mensual")
         df_mes = df.copy()
         df_mes["mes"] = pd.to_datetime(df_mes["fecha"]).dt.to_period("M").astype(str)
         resumen_mensual = df_mes.groupby("mes")["cantidad"].sum().reset_index()
-        st.dataframe(resumen_mensual, use_container_width=True, hide_index=True)
+        st.dataframe(resumen_mensual, width="stretch", hide_index=True)
 
     st.subheader("Exportar reporte")
     subtitulo = (
@@ -82,7 +82,7 @@ else:
             data=df[columnas].to_csv(index=False).encode("utf-8-sig"),
             file_name=f"reporte_resmas_{fecha_desde}_{fecha_hasta}.csv",
             mime="text/csv",
-            use_container_width=True,
+            width="stretch",
         )
     with col_xlsx:
         st.download_button(
@@ -90,7 +90,7 @@ else:
             data=build_excel_bytes(df[columnas], sheet_name="Entregas"),
             file_name=f"reporte_resmas_{fecha_desde}_{fecha_hasta}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True,
+            width="stretch",
         )
     with col_pdf:
         st.download_button(
@@ -100,5 +100,5 @@ else:
             ),
             file_name=f"reporte_resmas_{fecha_desde}_{fecha_hasta}.pdf",
             mime="application/pdf",
-            use_container_width=True,
+            width="stretch",
         )

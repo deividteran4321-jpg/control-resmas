@@ -63,7 +63,7 @@ with tab_ingreso:
             )
 
         enviado = st.form_submit_button(
-            "Registrar ingreso", type="primary", use_container_width=True
+            "Registrar ingreso", type="primary", width="stretch"
         )
         if enviado:
             registrar_ingreso(fecha, tipo_sel, int(cantidad), observacion.strip())
@@ -78,7 +78,7 @@ with tab_ingreso:
     else:
         st.dataframe(
             df_ing[["fecha", "tipo_resma", "cantidad", "observacion"]],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 

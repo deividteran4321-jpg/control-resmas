@@ -110,7 +110,7 @@ with col1:
     if not df_stock_hist.empty:
         st.plotly_chart(
             _sparkline(df_stock_hist, "fecha", "stock", "#1d4ed8", "rgba(29,78,216,0.15)"),
-            use_container_width=True,
+            width="stretch",
             config=_CHART_CONFIG,
         )
 with col2:
@@ -123,7 +123,7 @@ with col2:
     if not df_serie.empty:
         st.plotly_chart(
             _sparkline(df_serie, "fecha", "cantidad", "#10b981", "rgba(16,185,129,0.15)"),
-            use_container_width=True,
+            width="stretch",
             config=_CHART_CONFIG,
         )
 with col3:
@@ -168,7 +168,7 @@ with tab_resumen:
                 margin=dict(l=0, r=0, t=10, b=0),
                 yaxis=dict(gridcolor="rgba(37,99,235,0.10)"),
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
     with col_der:
         st.subheader("Consumo por gerencia")
@@ -193,7 +193,7 @@ with tab_resumen:
             )
             evento = st.plotly_chart(
                 fig2,
-                use_container_width=True,
+                width="stretch",
                 on_select="rerun",
                 selection_mode="points",
                 key="chart_gerencia",
@@ -210,7 +210,7 @@ with tab_resumen:
             else:
                 st.dataframe(
                     df_emp.head(8),
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                     column_config={
                         "cantidad": st.column_config.ProgressColumn(
@@ -242,11 +242,11 @@ with tab_tipo:
                 color_discrete_sequence=PALETA,
             )
             fig3.update_layout(margin=dict(l=0, r=0, t=10, b=0))
-            st.plotly_chart(fig3, use_container_width=True)
+            st.plotly_chart(fig3, width="stretch")
         with col_tabla:
             st.dataframe(
                 df_tipo,
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "cantidad": st.column_config.ProgressColumn(
@@ -266,7 +266,7 @@ with tab_gerencia:
     else:
         st.dataframe(
             df_gerencia_full,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "cantidad": st.column_config.ProgressColumn(
